@@ -1,0 +1,198 @@
+<html>
+	<head>
+		<title>Queue Manager</title>
+		<style type="text/css" media="screen">
+			body {
+				font-family: 'Lucida Grande';
+				font-size: 14px;
+				font-style: normal;
+				font-variant: normal;
+				font-weight: normal;
+			}
+			
+			.smaller {
+				font-size: 75%;
+				line-height: 75%;
+			}
+		</style>
+	</head>
+</html>
+
+<h1>Queue Manager - Queue #<span id="queue-number">1</span></h1>
+
+<div id="wrapper" style="margin: 0 auto; width: 600px;">
+	<div id="speaking" style="background: #ffffdd; border: 1px solid #cccccc; font-weight: bold; margin-bottom: 2px; padding: 7px;">&hellip;</div>
+	
+	<div id="queue" style="border: 1px solid #cccccc; height: 400px; overflow-y: auto;">
+		<p align="center" style="line-height: 400px; margin: 0; padding: 0;"><em>The queue is empty&hellip;</em></p>
+	</div>
+
+	<input type="text" id="name" placeholder="Enter a name to add to the queue..." style="border: 1px solid #cccccc; outline: 0; padding: 5px 8px; width: 100%;" />
+	
+	<p class="smaller">Press the up arrow (&uarr;) to advance speakers</p>
+	<p class="smaller">Press the left arrow (&larr;) or right arrow (&rarr;) to switch queues</p>
+	<p class="smaller">Press the down arrow (&darr;) to delete the current queue</p>
+	<p class="smaller">Press the escape key (<code>esc</code>) to clear the current queue</p>
+
+	<div id="status" class="smaller"></div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+	window.onload = function() {		
+		// hold our arrays
+		var queues = [[]];
+		var currentQueueIndex = 0;
+		
+		// hold our references to divs
+		var queueNumber = document.getElementById('queue-number');
+		var speaking = document.getElementById('speaking');
+		var queue = document.getElementById('queue');
+		var nameBox = document.getElementById('name');
+		var status = document.getElementById('status');
+	
+		addListeners();
+	
+		// writes the given text to the queue,
+		// provided it's not already there
+		function addToQueue(text) {
+			// make sure they typed something
+			if(text.replace(/\W/gi, '') === '') {
+				showError('You did not enter a name!');
+				return false;
+			}
+			
+			// check if it's already in the queue
+			for(var i = 0; i < queues[currentQueueIndex].length; i++) {
+				if(queues[currentQueueIndex][i].toLowerCase() === text.toLowerCase()) {
+					showError(text+' is already in the queue!');
+					return false;
+				}
+			}
+			
+			queues[currentQueueIndex].push(text);
+		}
+	
+		function redrawQueue() {
+			// update our queue number
+			queueNumber.innerHTML = currentQueueIndex+1;
+			
+			// kill the existing content
+			speaking.innerHTML = '';
+			queue.innerHTML = '';
+			
+			// edge case once queue is completely empty
+			if(queues[currentQueueIndex].length === 0) {
+				speaking.innerHTML = '&hellip;';
+				queue.innerHTML = '<p align="center" style="line-height: 400px; margin: 0; padding: 0;"><em>The queue is empty&hellip;</em></p>';
+			}
+			
+			for(var i = 0; i < queues[currentQueueIndex].length; i++) {
+				if(i === 0) {
+					speaking.innerHTML = queues[currentQueueIndex][i];
+				} else {
+					var background = i%2 === 0 ? '#f7f7f7' : '#e7e7e7';
+					var div = document.createElement('div');
+						div.setAttribute('style', 'background: '+background+'; padding: 7px; border-bottom: 1px solid #cccccc;');
+						div.innerHTML = queues[currentQueueIndex][i];
+						
+					queue.appendChild(div);
+				}
+			}
+		}
+		
+		// create and focus to a new queue
+		function createNewQueue() {
+			queues.push([]);
+		}
+		
+		// get the previous queue
+		function prevQueue() {
+			if(currentQueueIndex === 0) {
+				showError('You are already on the first queue!');
+				return false;
+			}
+			
+			currentQueueIndex--;
+		}
+		
+		// advance the current queue one person
+		function advanceQueue() {
+			queues[currentQueueIndex].shift();
+			redrawQueue();
+		}
+		
+		// get the next queueu
+		function nextQueue() {
+			// if it's the last element, create a new queue
+			if(currentQueueIndex === queues.length-1) {
+				createNewQueue();
+			}
+			
+			currentQueueIndex++;
+		}
+		
+		// deletes the current queue
+		function deleteQueue() {
+			// make sure they can actually delete the queue
+			if(queues.length === 1) {
+				showError('You cannot delete the only queue - clear the queue instead!');
+				return false;
+			}
+			
+			queues.splice(currentQueueIndex, 1);
+			currentQueueIndex--;
+		}
+		
+		function clearQueue() {
+			queues[currentQueueIndex] = [];
+			nameBox.value = '';
+		}
+
+		function addListeners() {
+			// namebox
+			nameBox.onkeydown = function(e) {
+				if(e.keyCode === 13) {
+					addToQueue(this.value);
+					this.value = '';
+					redrawQueue();
+				}
+			}
+			
+			// advancing queue
+			document.onkeyup = function(e) {
+				if(e.keyCode === 27 || (e.keyCode >= 37 && e.keyCode <= 40)) {
+					if(e.keyCode === 27) {
+						// esc key
+						clearQueue();
+					} else if(e.keyCode === 37) {
+						// left arrow
+						prevQueue();
+					} else if(e.keyCode === 38) {
+						// up arrow
+						advanceQueue();
+					} else if(e.keyCode === 39) {
+						// right arrow
+						nextQueue();
+					} else if(e.keyCode === 40) {
+						// down arrow
+						deleteQueue();
+					}
+					
+					// finally redrawn the queue now
+					redrawQueue();
+				}
+			}
+		}
+	
+		// displays a nice error message
+		function showError(text) {
+			var errorDiv = document.createElement('div');
+				errorDiv.setAttribute('style', 'background: #ffdddd; border: 1px solid #990000; color: #990000; padding: 7px; margin-bottom: 2px;');
+				errorDiv.innerHTML = text;
+		
+			status.appendChild(errorDiv);
+			
+			setTimeout(function() { status.removeChild(errorDiv) }, 3000);
+		}
+	}
+</script>
