@@ -1,6 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<title>Queue Manager</title>
+		<meta charset="utf-8">
 		<style type="text/css" media="screen">
 			body {
 				font-family: 'Lucida Grande';
@@ -16,18 +18,18 @@
 			}
 		</style>
 	</head>
-</html>
 
-<h1>Queue Manager - Queue #<span id="queue-number">1</span></h1>
+<body>
+<h1 style="text-align:center; margin-top: 100px;">Queue Manager - Queue #<span id="queue-number">1</span></h1>
 
 <div id="wrapper" style="margin: 0 auto; width: 600px;">
 	<div id="speaking" style="background: #ffffdd; border: 1px solid #cccccc; font-weight: bold; margin-bottom: 2px; padding: 7px;">&hellip;</div>
 	
-	<div id="queue" style="border: 1px solid #cccccc; height: 400px; overflow-y: auto;">
-		<p align="center" style="line-height: 400px; margin: 0; padding: 0;"><em>The queue is empty&hellip;</em></p>
+	<div id="queue" style="border: 1px solid #cccccc; min-height: 40px; padding:0;"> <!-- overflow-y: auto; -->
+		<p style="text-align:center;"><em>The queue is empty&hellip;</em></p>
 	</div>
 
-	<input type="text" id="name" placeholder="Enter a name to add to the queue..." style="border: 1px solid #cccccc; outline: 0; padding: 5px 8px; width: 100%;" />
+	<input type="text" id="name" placeholder="Enter a name to add to the queue..." style="border: 1px solid #cccccc; padding: 5px 8px; width: 585px;" />
 	
 	<p class="smaller">Press the up arrow (&uarr;) to advance speakers</p>
 	<p class="smaller">Press the left arrow (&larr;) or right arrow (&rarr;) to switch queues</p>
@@ -37,7 +39,7 @@
 	<div id="status" class="smaller"></div>
 </div>
 
-<script type="text/javascript" charset="utf-8">
+<script type="text/javascript">
 	window.onload = function() {		
 		// hold our arrays
 		var queues = [[]];
@@ -83,7 +85,7 @@
 			// edge case once queue is completely empty
 			if(queues[currentQueueIndex].length === 0) {
 				speaking.innerHTML = '&hellip;';
-				queue.innerHTML = '<p align="center" style="line-height: 400px; margin: 0; padding: 0;"><em>The queue is empty&hellip;</em></p>';
+				queue.innerHTML = '<p style="text-align:center;"><em>The queue is empty&hellip;</em></p>';
 			}
 			
 			for(var i = 0; i < queues[currentQueueIndex].length; i++) {
@@ -196,3 +198,5 @@
 		}
 	}
 </script>
+</body>
+</html>
